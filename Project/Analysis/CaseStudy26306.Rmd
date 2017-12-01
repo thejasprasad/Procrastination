@@ -1,0 +1,347 @@
+---
+title: "Case Study 2"
+author: "Joe Schueder, Thejas Prasad"
+date: "November 24, 2017"
+output: 
+  html_document:
+    keep_md: true
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r , libraries, echo=TRUE}
+library(knitr)
+library(kableExtra)
+library(maps)
+library(mapproj)
+library(rvest)
+library(plyr)
+library(reshape2)
+library(tidyr)
+library(ggplot2)
+library(ggthemes)
+```
+
+## Procrastination
+
+Procrastination Data Analysis.The data set used in this analysis is obtained from the study, tabulated by Qualtrics.
+
+
+```{r firstanalysis, echo=TRUE}
+#1a read csv
+getwd()
+procrast <- read.csv(file = "Procrastination.csv", sep=",", header=TRUE)
+
+# number of rows and columns
+dim(procrast)
+# 2b change column names to remove spaces underscores and slashes, decrease characters  
+colnames(procrast)
+colnames(procrast) <- c("Age","Gender","Kids","Edu","WorkStatus","AnnualIncome","CurrentOccup","Timeinposyr","Timeinposmn","Communitysize","Countryres","MaritalStatus","Numsons","Numdaughters","DP1","DP2","DP3","DP4","DP5","AIP1","AIP2","AIP3","AIP4","AIP5","AIP6","AIP7","AIP8","AIP9","AIP10","AIP11","AIP12","AIP13","AIP14","AIP15","GP1","GP2","GP3","GP4","GP5","GP6","GP7","GP8","GP9","GP10","GP11","GP12","GP13","GP14","GP15","GP16","GP17","GP18","GP19","GP20","SWLS1","SWLS2","SWLS3","SWLS4","SWLS5","UCONSPRO","OTHCONSPRO")
+
+#2c fix time in position, country of residence, number of son, and current occupation 
+#get time in service out of scientific notation
+procrast$Timeinposyr <- as.integer(format(procrast$Timeinposyr, scientific = F))
+# 2ci Turning 999 into NA
+procrast[,"Timeinposyr"][procrast[,"Timeinposyr"]==999] <- NA
+#converting Male and Female into numeric representation
+procrast$Numsons <- as.character(procrast$Numsons)
+
+#2c ii
+procrast$Numsons[procrast$Numsons == "Male"] <- "1"
+procrast$Numsons[procrast$Numsons == "Female"] <- "2"
+
+#2c iii
+#get rid of 0 and blank and convert them to NA
+procrast$Countryres <- as.character(procrast$Countryres)
+procrast$Countryres[procrast$Countryres == "0"] <- "NA"
+procrast$Countryres[procrast$Countryres == " "] <- "NA"
+
+#2 c iv
+#fix the occupation column NAs blanks, group
+procrast$CurrentOccup <- as.character(procrast$CurrentOccup)
+procrast$CurrentOccup[procrast$CurrentOccup == "0"] <- "NA"
+procrast$CurrentOccup[procrast$CurrentOccup == "please specify"] <- "NA"
+procrast$CurrentOccup = toupper(procrast$CurrentOccup)
+#grouping like job titles together now
+procrast$CurrentOccup <- gsub("TEACHER.*","TEACHER", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("TECH.*","TECHNICAL", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("WRIT*","WRITER", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("STUDENT.*","STUDENT", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("*.STUDENT","STUDENT", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("SYSTEM.*","TECHNICAL", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("SOFTWARE.*","TECHNICAL", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("SELF.*","SELF EMPLOYED", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("SALES.*","SALES", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("RESEARCH.*","RESEARCH", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("REAL ESTATE.*","REAL ESTATE", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("REALTOR.*","REAL ESTATE", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("PROGRAMMER.*","TECHNICAL", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("IT .*","TECHNICAL", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("COMPUTER.*","TECHNICAL", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("DIRECTOR.*","DIRECTOR", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("FINANC.*","FINANCIAL", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("INSURANCE.*","INSURANCE", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("INFORMATION.*","TECHNICAL", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("MEDICAL.*","MEDICAL", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("LEGAL.*","LEGAL", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("LAW.*","LEGAL", procrast$CurrentOccup)
+procrast$CurrentOccup <- gsub("OFFICE.*","OFFICE", procrast$CurrentOccup)
+kable(unique(procrast$CurrentOccup), "html", padding = 2, longtable = TRUE) %>%
+kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+#2 d CHECK FIELD TYPES -checking field types here, correcting later if needed
+str(procrast)
+
+#2 e Get the means of the procrastination indexes
+
+procrast$dpmean <- (procrast$DP1 + procrast$DP2 + procrast$DP3 + procrast$DP4 + procrast$DP5)/5
+
+procrast$aipmean <- (procrast$AIP1 + procrast$AIP2 +procrast$AIP3 +procrast$AIP4 +procrast$AIP5 +procrast$AIP6 +procrast$AIP7 +procrast$AIP8 +procrast$AIP9 +procrast$AIP10 +procrast$AIP11 +procrast$AIP12 +procrast$AIP13 +procrast$AIP14 + procrast$AIP15) /15
+
+procrast$gpmean <- (procrast$GP1 + procrast$GP2 + procrast$GP3 + procrast$GP4 + procrast$GP5 + procrast$GP6 + procrast$GP7 + procrast$GP8 + procrast$GP9 + procrast$GP10 + procrast$GP11 + procrast$GP12 + procrast$GP13 + procrast$GP14 + procrast$GP15 + procrast$GP16 + procrast$GP17 + procrast$GP18 + procrast$GP19 + procrast$GP20)/20
+
+procrast$swlsmean <- (procrast$SWLS1 + procrast$SWLS2 + procrast$SWLS3 + procrast$SWLS4 + procrast$SWLS5)/5
+
+kable(head(procrast), "html", padding = 2, longtable = TRUE) %>%
+kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+##3 Getting data about human development index from wikipedia
+
+URL <- 'https://en.wikipedia.org/wiki/List_of_countries_by_Human_Development_Index#Complete_list_of_countries'
+
+#very high index countries
+  HDIURL <- URL %>%
+  read_html() %>%
+  html_nodes(xpath='//*[@id="mw-content-text"]/div/div[5]/table') %>%
+  html_table(fill = TRUE)
+  HDITABVH <- HDIURL[[1]]
+
+#labeling useful columns  
+colnames(HDITABVH)[1:5] <- c("Rank", "RankChng", "Country", "HDI", "HDICHNG")
+
+#limiting columns and categorizing this table
+HDITABVHS <- HDITABVH[3:4]
+HDITABVHS$HDICAT <- "Very High"
+
+#getting rid of extra rows
+HDITABVHS <- HDITABVHS[-c(1, 2, 3, 30, 31), ]
+
+#high index countries
+  HDIURL <- URL %>%
+  read_html() %>%
+  html_nodes(xpath='//*[@id="mw-content-text"]/div/div[6]/table') %>%
+  html_table(fill = TRUE)
+  HDITABH <- HDIURL[[1]]
+
+#change column names
+  
+colnames(HDITABH)[1:5] <- c("Rank", "RankChng", "Country", "HDI", "HDICHNG")
+HDITABHS <- HDITABH[3:4]
+HDITABHS$HDICAT <- "High"
+  
+#getting rid of extra rows
+HDITABHS <- HDITABHS[-c(1, 2, 3, 32, 33, 56), ]
+
+#medium index countries
+  HDIURL <- URL %>%
+  read_html() %>%
+  html_nodes(xpath='//*[@id="mw-content-text"]/div/div[7]/table') %>%
+  html_table(fill = TRUE)
+  HDITABM <- HDIURL[[1]]
+colnames(HDITABM)[1:5] <- c("Rank", "RankChng", "Country", "HDI", "HDICHNG")
+  
+HDITABMS <- HDITABM[3:4]
+HDITABMS$HDICAT <- "Medium"
+
+#getting rid of extra rows
+HDITABMS <- HDITABMS[-c(1, 2, 3, 24, 25), ]
+
+#low index countries
+  HDIURL <- URL %>%
+  read_html() %>%
+  html_nodes(xpath='//*[@id="mw-content-text"]/div/div[8]/table') %>%
+  html_table(fill=TRUE)
+  HDITABL <- HDIURL[[1]]
+  
+  colnames(HDITABL)[1:5] <- c("Rank", "RankChng", "Country", "HDI", "HDICHNG")
+  HDITABLS <- HDITABL[3:4]
+  HDITABLS$HDICAT <- "Low"
+  
+#getting rid of extra rows
+HDITABLS <- HDITABLS[-c(1, 2, 3, 25, 26), ]
+  
+# The commented code below was used to explore the data to eliminate bad rows
+# kable(HDITABVHS, "html", padding = 2, longtable = TRUE, row.names = TRUE) %>%
+# kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+# 
+# kable(HDITABHS, "html", padding = 2, longtable = TRUE, row.names = TRUE) %>%
+# kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+# 
+# kable(HDITABMS, "html", padding = 2, longtable = TRUE, row.names = TRUE) %>%
+# kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+# 
+# kable(HDITABLS, "html", padding = 2, longtable = TRUE, row.names = TRUE) %>%
+# kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+ 
+#merge all the tables together
+hdicomb <- rbind(HDITABVHS, HDITABHS, HDITABMS, HDITABLS)
+
+kable(hdicomb, "html", padding = 2, longtable = TRUE, row.names = TRUE) %>%
+kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+#write table to csv
+#write.table(hdicomb, file = "hdicomb.csv", col.names = FALSE, row.names = FALSE, sep =",")
+
+#merge procrastination and and hdicomb
+colnames(hdicomb)[3] <- "Countryres"
+procrastcomb <- merge(procrast, hdicomb, by=c("Countryres"), all = FALSE )
+
+kable(head(procrastcomb), "html", padding = 2, longtable = TRUE, row.names = TRUE) %>%
+kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+#remove everone under 18 and over 65 since this is for a work analysis
+
+procrastcomb <- procrastcomb[procrastcomb$Age > 18, ]
+procrastcomb <- procrastcomb[procrastcomb$Age < 65, ]
+
+#convert HDI to numeric
+
+procrastcomb$HDI <- as.numeric(format(procrastcomb$HDI, scientific = F))
+
+#summary statistics of procrastcomb
+sumtable <- summary(procrastcomb$Age)
+Statistics <- c("Min.", "1st Qu.",  "Median", "Mean", "3rd Qu.", "Max.", "NA's" )
+Age <- c(sumtable[1], sumtable[2],  sumtable[3], sumtable[4], sumtable[5], sumtable[6], sumtable[7] )
+
+sumtable <- summary(procrastcomb$AnnualIncome)
+Income <- c(sumtable[1], sumtable[2],  sumtable[3], sumtable[4], sumtable[5], sumtable[6], sumtable[7] )
+
+sumtable <- summary(procrastcomb$HDI)
+HDI <- c(sumtable[1], sumtable[2],  sumtable[3], sumtable[4], sumtable[5], sumtable[6], sumtable[7] )
+sumtable <- summary(procrastcomb$aipmean)
+AIPmean <- c(sumtable[1], sumtable[2],  sumtable[3], sumtable[4], sumtable[5], sumtable[6], sumtable[7] )
+sumtable <- summary(procrastcomb$dpmean)
+DPmean <- c(sumtable[1], sumtable[2],  sumtable[3], sumtable[4], sumtable[5], sumtable[6], sumtable[7] )
+sumtable <- summary(procrastcomb$gpmean)
+GPmean <- c(sumtable[1], sumtable[2],  sumtable[3], sumtable[4], sumtable[5], sumtable[6], sumtable[7] )
+sumtable <- summary(procrastcomb$swlsmean)
+SSWLSmean <- c(sumtable[1], sumtable[2],  sumtable[3], sumtable[4], sumtable[5], sumtable[6], sumtable[7] )
+sumdf <- data.frame(Statistics, Age, Income, HDI, AIPmean, DPmean, GPmean, SSWLSmean)
+kable(sumdf, "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
+kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+#Histograms of two vairables above.  AIP is very much a bell shape curve and evenly distributed, while income is a left skewed curve with most falling on the lower end of the income scale
+hist(procrastcomb$aipmean, col="Green", ylab ="AIP Mean", xlab
+="FREQUENCY", main = "AIP Mean Histogram")
+hist(procrastcomb$AnnualIncome, col="Blue", ylab ="Annual Income", xlab
+="FREQUENCY", main = "Annual Income Histogram")
+
+##frequencies of Gender, work Status, Occupation
+Gendersum <- count(procrastcomb, 'Gender')
+WStatussm <- count(procrastcomb, 'WorkStatus')
+OccuStSm <- count(procrastcomb, 'CurrentOccup')
+
+kable(Gendersum, "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
+kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+kable(WStatussm, "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
+kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+kable(OccuStSm, "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
+kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+#Count of respondents by country
+Countrycnt <- count(procrastcomb, 'Countryres')
+colnames(Countrycnt)[2] <- "Frequency"
+Countrycnt <- Countrycnt[order(-Countrycnt$Frequency),]
+kable(Countrycnt, "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
+kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+str(procrastcomb)
+procrastcomb$UCONSPRO <- as.character(procrastcomb$UCONSPRO )
+procrastcomb$OTHCONSPRO <- as.character(procrastcomb$OTHCONSPRO)
+
+procrastmatch <- procrastcomb[which(procrastcomb$UCONSPRO == procrastcomb$OTHCONSPRO), ]
+promatchsum <- count(procrastmatch, 'UCONSPRO')
+colnames(promatchsum)[1] <- "Responses"
+colnames(promatchsum)[2] <- "#Matches"
+kable(promatchsum, "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
+kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+
+#barchart of top 15 dp
+
+top15dp <- aggregate(procrastcomb[, 62], by = list(procrastcomb$Countryres, procrastcomb$HDICAT), mean, na.rm=TRUE)
+colnames(top15dp) <- c("Country", "HDICat", "DPmean")
+top15dp <- top15dp[order(-top15dp$DPmean),]
+#top15dp
+top15dp <- top15dp[1:15,]
+top15dp
+
+ ggplot(top15dp, aes(reorder(Country, DPmean),DPmean))+
+ geom_bar(aes(fill=HDICat), stat= "identity", width = .4, position = position_dodge(width = .9))+
+ ggtitle("Top 15 DP Mean Countries")+
+ theme(plot.title = element_text(hjust = 0.5), legend.position="none",)+
+ xlab("Country")+
+ ylab("DP Means")+
+ theme(axis.text.y=element_text(hjust = .5, vjust = .5))+
+  theme_solarized()+
+ coord_flip()
+
+#barchart of top 15 aip
+top15aip <- aggregate(procrastcomb[, 63], by = list(procrastcomb$Countryres, procrastcomb$HDICAT), mean, na.rm=TRUE)
+colnames(top15aip) <- c("Country", "HDICAT","AIPmean")
+top15aip <- top15aip[order(-top15aip$AIPmean),]
+# top15aip
+top15aip <- top15aip[1:15,]
+# top15aip
+
+ ggplot(top15aip, aes(reorder(Country, AIPmean),AIPmean))+
+ geom_bar(aes(fill=HDICAT), stat= "identity", width = .4, position = position_dodge(width = .9))+
+ ggtitle("Top 15 AIP Mean Countries")+ 
+ theme(plot.title = element_text(hjust = 0.5), legend.position="none",)+
+ xlab("Country")+
+ ylab("AIP Means")+ 
+ theme(axis.text.y=element_text(hjust = .5, vjust = .5))+
+ theme_solarized()+
+ coord_flip()
+
+ #relationship between age and income
+ 
+ ggplot(procrastcomb, aes(x= procrastcomb$Age, y=procrastcomb$AnnualIncome))+
+ geom_point(aes(col = procrastcomb$Gender))+
+   guides(col=guide_legend(title="Gender"))+
+geom_smooth(method=lm)+
+ ggtitle("Age and Income Relationship")+ 
+ theme(plot.title = element_text(hjust = 0.5), legend.position="none",)+
+ xlab("Age")+
+ ylab("Income")+ 
+ theme(axis.text.y=element_text(hjust = .5, vjust = .5))+
+ theme_solarized()
+
+ 
+ #relationship between Life satisfaction and HDI
+ 
+ ggplot(procrastcomb, aes(x= procrastcomb$HDI, y=procrastcomb$swlsmean))+
+ geom_point()+
+geom_smooth(method=lm)+
+ ggtitle("HDI and Life Satisfaction relationship")+ 
+ theme(plot.title = element_text(hjust = 0.5), legend.position="none",)+
+ xlab("HDI")+
+ ylab("Life Satisfaction Mean")+ 
+ theme(axis.text.y=element_text(hjust = .5, vjust = .5))+
+ theme_solarized() 
+ 
+ #HDI cat and life satisfaction
+
+ ggplot(procrastcomb, aes(procrastcomb$swlsmean, procrastcomb$HDICAT))+
+ geom_bar(aes(fill=HDICAT), stat= "identity", width = .4, position = position_dodge(width = .9))+
+ ggtitle("HDI and Life Satisfaction relationship")+ 
+ theme(plot.title = element_text(hjust = 0.5), legend.position="none",)+
+ xlab("HDI")+
+ ylab("Life Satisfaction Mean")+ 
+ theme(axis.text.y=element_text(hjust = .5, vjust = .5))+
+ theme_solarized()
+```
+
