@@ -1,17 +1,12 @@
 ---
-title: "Case Study 2"
-author: "Joe Schueder, Thejas Prasad"
+title: "Employment Study(Case Study 2)"
+author: "Joe Schueder/Thejas Prasad"
 date: "November 24, 2017"
-output: 
-  html_document:
-    keep_md: true
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
-
 knitr::opts_chunk$set(echo = TRUE)
-```
-```{r , libraries, echo=TRUE}
 library(knitr)
 library(kableExtra)
 library(maps)
@@ -24,47 +19,55 @@ library(ggplot2)
 library(ggthemes)
 ```
 
-## Procrastination
+#####Prepared by Joe Schueder and Thejas Prasar for "WAM (We are Motivated), Inc.
 
-Procrastination Data Analysis.The data set used in this analysis is obtained from the study, tabulated by Qualtrics.
+WAM Inc. would like an analysis of where to place their next set of employment training centers to market job productivity training.  The primary criteria that WAM uses when creating new centers is motivation levels/procrastination levels, income averages, and education levels.  They are also interested in how well developed the country of a potential center is.
 
+The primary goal of this analysis was to understand the current climate for employment training centers around the world. This was done by analyzing employee data from several countries which included relevant procrastination scores, education, occupation, and income levels.  This data was combined with the internationally recognized HDI index.
 
-```{r firstanalysis, echo=TRUE}
-#1a read csv
+The analysis is shown below. 
+
+Data Preparation to read in and clean data was done.
+
+```{r dataandclean}
+#1a
 getwd()
+setwd("C:/Users/jjschued/Documents")
 procrast <- read.csv(file = "Procrastination.csv", sep=",", header=TRUE)
 
+#1a
 # number of rows and columns
 dim(procrast)
-# 2b change column names to remove spaces underscores and slashes, decrease characters  
-colnames(procrast)
+#1b column names
+
+#code below is for viewing all column names befoe re-lableing
+#colnames(procrast)
+
+#relabling column names for readability
 colnames(procrast) <- c("Age","Gender","Kids","Edu","WorkStatus","AnnualIncome","CurrentOccup","Timeinposyr","Timeinposmn","Communitysize","Countryres","MaritalStatus","Numsons","Numdaughters","DP1","DP2","DP3","DP4","DP5","AIP1","AIP2","AIP3","AIP4","AIP5","AIP6","AIP7","AIP8","AIP9","AIP10","AIP11","AIP12","AIP13","AIP14","AIP15","GP1","GP2","GP3","GP4","GP5","GP6","GP7","GP8","GP9","GP10","GP11","GP12","GP13","GP14","GP15","GP16","GP17","GP18","GP19","GP20","SWLS1","SWLS2","SWLS3","SWLS4","SWLS5","UCONSPRO","OTHCONSPRO")
 
-#2c fix time in position, country of residence, number of son, and current occupation 
-#get time in service out of scientific notation
+#2c i get time in service out of scientific notation
 procrast$Timeinposyr <- as.integer(format(procrast$Timeinposyr, scientific = F))
-# 2ci Turning 999 into NA
+# Turning 999 into NA
 procrast[,"Timeinposyr"][procrast[,"Timeinposyr"]==999] <- NA
-#converting Male and Female into numeric representation
+#2 c ii converting Male and Female into numeric representation
 procrast$Numsons <- as.character(procrast$Numsons)
 
-#2c ii
 procrast$Numsons[procrast$Numsons == "Male"] <- "1"
 procrast$Numsons[procrast$Numsons == "Female"] <- "2"
-
-#2c iii
+#2ciii
 #get rid of 0 and blank and convert them to NA
 procrast$Countryres <- as.character(procrast$Countryres)
 procrast$Countryres[procrast$Countryres == "0"] <- "NA"
 procrast$Countryres[procrast$Countryres == " "] <- "NA"
 
-#2 c iv
+#2civ
 #fix the occupation column NAs blanks, group
 procrast$CurrentOccup <- as.character(procrast$CurrentOccup)
 procrast$CurrentOccup[procrast$CurrentOccup == "0"] <- "NA"
 procrast$CurrentOccup[procrast$CurrentOccup == "please specify"] <- "NA"
 procrast$CurrentOccup = toupper(procrast$CurrentOccup)
-#grouping like job titles together now
+#grouping like together now
 procrast$CurrentOccup <- gsub("TEACHER.*","TEACHER", procrast$CurrentOccup)
 procrast$CurrentOccup <- gsub("TECH.*","TECHNICAL", procrast$CurrentOccup)
 procrast$CurrentOccup <- gsub("WRIT*","WRITER", procrast$CurrentOccup)
@@ -88,13 +91,15 @@ procrast$CurrentOccup <- gsub("MEDICAL.*","MEDICAL", procrast$CurrentOccup)
 procrast$CurrentOccup <- gsub("LEGAL.*","LEGAL", procrast$CurrentOccup)
 procrast$CurrentOccup <- gsub("LAW.*","LEGAL", procrast$CurrentOccup)
 procrast$CurrentOccup <- gsub("OFFICE.*","OFFICE", procrast$CurrentOccup)
-kable(unique(procrast$CurrentOccup), "html", padding = 2, longtable = TRUE) %>%
-kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+#code below can be used to view all occupations
+# kable(unique(procrast$CurrentOccup), "html", padding = 2, longtable = TRUE) %>%
+# kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 
-#2 d CHECK FIELD TYPES -checking field types here, correcting later if needed
-str(procrast)
+#2d CHECK FIELD TYPES nothing wrong for now will convert later if needed
+#code commendted below can be uncommented to view data typess
+#str(procrast)
 
-#2 e Get the means of the procrastination indexes
+#2e Get the means of the procrastination indexes
 
 procrast$dpmean <- (procrast$DP1 + procrast$DP2 + procrast$DP3 + procrast$DP4 + procrast$DP5)/5
 
@@ -104,10 +109,11 @@ procrast$gpmean <- (procrast$GP1 + procrast$GP2 + procrast$GP3 + procrast$GP4 + 
 
 procrast$swlsmean <- (procrast$SWLS1 + procrast$SWLS2 + procrast$SWLS3 + procrast$SWLS4 + procrast$SWLS5)/5
 
+#code below for viewing table contents
 kable(head(procrast), "html", padding = 2, longtable = TRUE) %>%
 kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 
-##3 Getting data about human development index from wikipedia
+## 3a Getting data about human development index from wikipedia
 
 URL <- 'https://en.wikipedia.org/wiki/List_of_countries_by_Human_Development_Index#Complete_list_of_countries'
 
@@ -122,7 +128,8 @@ URL <- 'https://en.wikipedia.org/wiki/List_of_countries_by_Human_Development_Ind
 colnames(HDITABVH)[1:5] <- c("Rank", "RankChng", "Country", "HDI", "HDICHNG")
 
 #limiting columns and categorizing this table
-HDITABVHS <- HDITABVH[3:4]
+HDITABVHS <- HDITABVH[1:5]
+
 HDITABVHS$HDICAT <- "Very High"
 
 #getting rid of extra rows
@@ -138,10 +145,10 @@ HDITABVHS <- HDITABVHS[-c(1, 2, 3, 30, 31), ]
 #change column names
   
 colnames(HDITABH)[1:5] <- c("Rank", "RankChng", "Country", "HDI", "HDICHNG")
-HDITABHS <- HDITABH[3:4]
+HDITABHS <- HDITABH[1:5]
 HDITABHS$HDICAT <- "High"
   
-#getting rid of extra rows
+#getting rid of extra rows including one labled world which is not a country
 HDITABHS <- HDITABHS[-c(1, 2, 3, 32, 33, 56), ]
 
 #medium index countries
@@ -152,7 +159,7 @@ HDITABHS <- HDITABHS[-c(1, 2, 3, 32, 33, 56), ]
   HDITABM <- HDIURL[[1]]
 colnames(HDITABM)[1:5] <- c("Rank", "RankChng", "Country", "HDI", "HDICHNG")
   
-HDITABMS <- HDITABM[3:4]
+HDITABMS <- HDITABM[1:5]
 HDITABMS$HDICAT <- "Medium"
 
 #getting rid of extra rows
@@ -166,7 +173,7 @@ HDITABMS <- HDITABMS[-c(1, 2, 3, 24, 25), ]
   HDITABL <- HDIURL[[1]]
   
   colnames(HDITABL)[1:5] <- c("Rank", "RankChng", "Country", "HDI", "HDICHNG")
-  HDITABLS <- HDITABL[3:4]
+  HDITABLS <- HDITABL[1:5]
   HDITABLS$HDICAT <- "Low"
   
 #getting rid of extra rows
@@ -185,23 +192,29 @@ HDITABLS <- HDITABLS[-c(1, 2, 3, 25, 26), ]
 # kable(HDITABLS, "html", padding = 2, longtable = TRUE, row.names = TRUE) %>%
 # kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
  
-#merge all the tables together
+#3b merge all the tables together
 hdicomb <- rbind(HDITABVHS, HDITABHS, HDITABMS, HDITABLS)
 
 kable(hdicomb, "html", padding = 2, longtable = TRUE, row.names = TRUE) %>%
 kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 
-#write table to csv
-#write.table(hdicomb, file = "hdicomb.csv", col.names = FALSE, row.names = FALSE, sep =",")
+dim(hdicomb)
+
+#3c
+#write table to csv(6a)
+setwd("C:/Users/jjschued/Documents")
+write.table(hdicomb, file = "hdicomb.csv", col.names = TRUE, row.names = FALSE, sep =",")
 
 #merge procrastination and and hdicomb
 colnames(hdicomb)[3] <- "Countryres"
 procrastcomb <- merge(procrast, hdicomb, by=c("Countryres"), all = FALSE )
 
+
+
 kable(head(procrastcomb), "html", padding = 2, longtable = TRUE, row.names = TRUE) %>%
 kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 
-#remove everone under 18 and over 65 since this is for a work analysis
+#4a remove everone under 18 and over 65 since this is for a work analysis since people typically stop working at 65
 
 procrastcomb <- procrastcomb[procrastcomb$Age > 18, ]
 procrastcomb <- procrastcomb[procrastcomb$Age < 65, ]
@@ -210,7 +223,17 @@ procrastcomb <- procrastcomb[procrastcomb$Age < 65, ]
 
 procrastcomb$HDI <- as.numeric(format(procrastcomb$HDI, scientific = F))
 
-#summary statistics of procrastcomb
+#write table to csv(6b)
+write.table(procrastcomb, file = "procrastcomb.csv", col.names = TRUE, row.names = FALSE, sep =",")
+
+```
+
+
+
+Summary statistics of the important parameters are presented below for all of the employee survey responses.  This gives a baseline for what an employer would expect on average for an employee across the world.  Following the summary statistics there are several visuals that help represent this information.  It shows that motivation or procrastination levels are an evenly distributed value with most people falling in the middle.  Income, on the other hand is left skewed with a few clusters of higher income employees, but many others on the lower end of the pay spectrum.  Following the visualizations, some additional summary information is presented about the respondents.  These include: gender, employment status,occupation titles, country of residence, and procrastination perception.  The gender count is evenly split, while most workers are full time.  Occupation title was a very inconsistent field therefore there is a concentration of frequent titles at the top and quickly trailing off to many additional titles with only one respondent. This is sorted in descending order to easily identify top titles.  Next, Country of residence is displayed in descending order as well and it can be noted many respondents are from the United States. Finally, an analysis of perceptions are presented.  Shown are comparisons of where perceptions match and where they do not match between the respondents and others. This shows that most people consider themselves procrastinators.
+
+```{r prelimanalysi}
+# 4b summary statistics of procrastcomb
 sumtable <- summary(procrastcomb$Age)
 Statistics <- c("Min.", "1st Qu.",  "Median", "Mean", "3rd Qu.", "Max.", "NA's" )
 Age <- c(sumtable[1], sumtable[2],  sumtable[3], sumtable[4], sumtable[5], sumtable[6], sumtable[7] )
@@ -238,10 +261,12 @@ hist(procrastcomb$aipmean, col="Green", ylab ="AIP Mean", xlab
 hist(procrastcomb$AnnualIncome, col="Blue", ylab ="Annual Income", xlab
 ="FREQUENCY", main = "Annual Income Histogram")
 
-##frequencies of Gender, work Status, Occupation
+## 4c frequencies of Gender, work Status, Occupation
 Gendersum <- count(procrastcomb, 'Gender')
 WStatussm <- count(procrastcomb, 'WorkStatus')
 OccuStSm <- count(procrastcomb, 'CurrentOccup')
+
+OccuStSm <- OccuStSm[order(-OccuStSm$freq),]
 
 kable(Gendersum, "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
 kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
@@ -252,32 +277,55 @@ kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 kable(OccuStSm, "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
 kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 
-#Count of respondents by country
+# 4d Count of respondents by country
 Countrycnt <- count(procrastcomb, 'Countryres')
 colnames(Countrycnt)[2] <- "Frequency"
 Countrycnt <- Countrycnt[order(-Countrycnt$Frequency),]
 kable(Countrycnt, "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
 kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 
-str(procrastcomb)
+#str(procrastcomb)
+#4e matched perceptions
 procrastcomb$UCONSPRO <- as.character(procrastcomb$UCONSPRO )
 procrastcomb$OTHCONSPRO <- as.character(procrastcomb$OTHCONSPRO)
-
+#where repsonses match
 procrastmatch <- procrastcomb[which(procrastcomb$UCONSPRO == procrastcomb$OTHCONSPRO), ]
 promatchsum <- count(procrastmatch, 'UCONSPRO')
 colnames(promatchsum)[1] <- "Responses"
 colnames(promatchsum)[2] <- "#Matches"
-kable(promatchsum, "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
+kable(promatchsum, "html", padding = 2, longtable = TRUE, row.names = FALSE, caption ="Personal perception procrastination responses that match others perceptions") %>%
+kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
+#where responses do not match
+procrastmismatch <- procrastcomb[which(procrastcomb$UCONSPRO != procrastcomb$OTHCONSPRO), ]
+promismatchsum <- count(procrastmismatch, 'UCONSPRO')
+colnames(promismatchsum)[1] <- "Responses"
+colnames(promismatchsum)[2] <- "#MisMatches"
+kable(promismatchsum, "html", padding = 2, longtable = TRUE, row.names = FALSE, caption ="Personal perception procrastination responses that do not match others perceptions") %>%
 kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 
-#barchart of top 15 dp
+```
+
+To get to where the greatest need is for the productivity training analysis must be shown at the country level.  When top most procrastinating countries compared by two different procrastination survey indices there emerges that there are eight countries that are in both indices. These are the Dominican Republic, Qatar, Panama, Ecuador, Sri Lanka, Turkey, Uruguay, and Iran. Many of these countries are in the HDI Category high. This seems like they are countries that would benefit most from the centers.  If, the company wished to focus more on countries with higher disposable incomes it might be best to limit the data to HDI category Very High.  If this restriction is made the top countries would be Qatar, Austria, Poland, Germany, Hong Kong, and Iceland.
+
+```{r detaianalysis}
+#5b barchart of top 15 dp
 
 top15dp <- aggregate(procrastcomb[, 62], by = list(procrastcomb$Countryres, procrastcomb$HDICAT), mean, na.rm=TRUE)
 colnames(top15dp) <- c("Country", "HDICat", "DPmean")
+
+#get the dp countries for very high hdi
+top15dpvh <- subset(top15dp, HDICat=='Very High' )
+top15dpvh <- top15dpvh[order(-top15dpvh$DPmean),]
+#top15dpvh
+
 top15dp <- top15dp[order(-top15dp$DPmean),]
 #top15dp
 top15dp <- top15dp[1:15,]
-top15dp
+#top15dp
+
+#write table to csv(6c)
+#setwd("C:/Users/jjschued/Documents")
+write.table(top15dp, file = "top15dp.csv", col.names = TRUE, row.names = FALSE, sep =",")
 
  ggplot(top15dp, aes(reorder(Country, DPmean),DPmean))+
  geom_bar(aes(fill=HDICat), stat= "identity", width = .4, position = position_dodge(width = .9))+
@@ -289,13 +337,22 @@ top15dp
   theme_solarized()+
  coord_flip()
 
-#barchart of top 15 aip
+#5c barchart of top 15 aip
 top15aip <- aggregate(procrastcomb[, 63], by = list(procrastcomb$Countryres, procrastcomb$HDICAT), mean, na.rm=TRUE)
 colnames(top15aip) <- c("Country", "HDICAT","AIPmean")
 top15aip <- top15aip[order(-top15aip$AIPmean),]
 # top15aip
+#write table to csv(6c)
+#setwd("C:/Users/jjschued/Documents")
+write.table(top15aip, file = "top15aip.csv", col.names = TRUE, row.names = FALSE, sep =",")
+
+#get the aip countries for very high hdi
+top15aipvh <- subset(top15aip, HDICAT=='Very High' )
+top15aipvh <-top15aipvh[order(-top15aipvh$AIPmean),]
+#top15aipvh
+
 top15aip <- top15aip[1:15,]
-# top15aip
+#top15aip
 
  ggplot(top15aip, aes(reorder(Country, AIPmean),AIPmean))+
  geom_bar(aes(fill=HDICAT), stat= "identity", width = .4, position = position_dodge(width = .9))+
@@ -307,7 +364,15 @@ top15aip <- top15aip[1:15,]
  theme_solarized()+
  coord_flip()
 
- #relationship between age and income
+
+```
+
+
+WAM also requested supplemental analysis regarding how to target advertising for their series of trainings.  Their interest was for ages, income, life satisfaction, and HDI categories of the targeted countries. The best relationship seems to be income to age.  There is more income at older ages. Other relationships were not consequential. Therefore, it is suggested to examine targeting older individuals. 
+
+
+```{r relationships}
+ #5d relationship between age and income
  
  ggplot(procrastcomb, aes(x= procrastcomb$Age, y=procrastcomb$AnnualIncome))+
  geom_point(aes(col = procrastcomb$Gender))+
@@ -321,7 +386,7 @@ geom_smooth(method=lm)+
  theme_solarized()
 
  
- #relationship between Life satisfaction and HDI
+ #5e relationship between Life satisfaction and HDI
  
  ggplot(procrastcomb, aes(x= procrastcomb$HDI, y=procrastcomb$swlsmean))+
  geom_point()+
@@ -335,13 +400,16 @@ geom_smooth(method=lm)+
  
  #HDI cat and life satisfaction
 
- ggplot(procrastcomb, aes(procrastcomb$swlsmean, procrastcomb$HDICAT))+
+ ggplot(procrastcomb, aes(x= procrastcomb$swlsmean, y=procrastcomb$HDICAT))+
  geom_bar(aes(fill=HDICAT), stat= "identity", width = .4, position = position_dodge(width = .9))+
- ggtitle("HDI and Life Satisfaction relationship")+ 
+ ggtitle("HDI and Life Satisfaction relationship")+
  theme(plot.title = element_text(hjust = 0.5), legend.position="none",)+
- xlab("HDI")+
- ylab("Life Satisfaction Mean")+ 
- theme(axis.text.y=element_text(hjust = .5, vjust = .5))+
+ xlab("Life Satisfaction Mean")+
+ ylab("HDICat")+
+ theme(axis.text.y=element_text(hjust = .5, vjust = .5))
  theme_solarized()
-```
 
+ 
+ 
+```
+In conclusion, though beyond the United States and a few other countries sample sizes are small the results suggest that there are markets that warrant additional analysis outside the scope of this project.  Those include: central Europe, Hong Kong, and Qatar.  Further surveys of employment age individuals should be gathered for all HDI Category-Very High to make better decisions about placement of their centers. It is important to place the centers in high-income areas in order to maximize exposure to customers with disposable income.   
