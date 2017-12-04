@@ -1,5 +1,6 @@
-# Procrastination Data Analysis [ WAM (We are Motivated), Inc. ]
-  The purpose of this github repository is to perform Procrastination Data Analysis. The data set used in this analysis is obtained from the study, tabulated by Qualtrics. This data analysis project is done for WAM (We are Motivated), Inc. WAM (We are Motivated), Inc would like to set up their employment training centers to market job productivity training across the world based on the analsis results.
+### Procrastination Data Analysis by WAM (We are Motivated), Inc. 
+
+  The purpose of this github repository is to perform Procrastination Data Analysis. The data set used in this analysis is obtained from the study, tabulated by Qualtrics. This data analysis project is done for WAM (We are Motivated), Inc. WAM Inc would like to set up their employment training centers to market job productivity training across the world based on the analysis results.
 
 Repository Structure:
 
