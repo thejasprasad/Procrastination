@@ -3,7 +3,8 @@ The purpose of this git hub repository is to perform Procrastination Data Analys
 
 Repository Structure:
 
-Procrastination -> Presentation 
+Procrastination -> Presentation
+
                 -> Project -> Analysis -> Data
 
 The repository is structured with two main directories as below :
