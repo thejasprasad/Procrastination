@@ -1,5 +1,5 @@
-# Procrastination
-The purpose of this git hub repository is to perform Procrastination Data Analysis. The data set used in this analysis is obtained from the study, tabulated by Qualtrics.
+# Procrastination Data Analysis [ WAM (We are Motivated), Inc. ]
+  The purpose of this github repository is to perform Procrastination Data Analysis. The data set used in this analysis is obtained from the study, tabulated by Qualtrics. This data analysis project is done for WAM (We are Motivated), Inc. WAM (We are Motivated), Inc would like to set up their employment training centers to market job productivity training across the world based on the analsis results.
 
 Repository Structure:
 
@@ -33,6 +33,10 @@ top15aip.csv
 
 HTML File:
 CaseStudy26306.html
+
+In the root directory (Procrastination) we have the Codebook, which provides details on data sets used in this analysis, variable names and all the analysis thats being done as part of this project.
+
+Codebook - Doing Data Science Case Study 2.pdf
 
 R Session Information
 sessionInfo()
