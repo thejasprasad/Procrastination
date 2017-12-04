@@ -13,16 +13,19 @@ Presentation folder and the Project folder.
 Project folder has a Analysis folder.
 
 Under Analysis folder there is a Data folder where the data used for this analysis is stored. It also has the merged data sets created and used in the analysis.
+
 CSV Files:
 hdicomb.csv
 procrastcomb.csv
 Procrastination.csv
 
 The code used for the analysis is stored in the Analysis folder.
+
 Rmd File:
 CaseStudy26306.Rmd
 
 Presentation folder contains the final output .csv files and the .html file generated.
+
 CSV Files :
 top15aip.csv
 top15aip.csv
