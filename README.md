@@ -6,7 +6,7 @@ Repository Structure:
 
 Procrastination -> Presentation
 
-                -> Project -> Analysis -> Data
+                 -> Project -> Analysis -> Data
 
 The repository is structured with two main directories as below :
 
@@ -40,7 +40,9 @@ In the root directory (Procrastination) we have the Codebook, which provides det
 Codebook - Doing Data Science Case Study 2.pdf
 
 R Session Information
+
 sessionInfo()
+
 R version 3.4.2 (2017-09-28)
 Platform: x86_64-apple-darwin15.6.0 (64-bit)
 Running under: macOS High Sierra 10.13.1
