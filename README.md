@@ -35,7 +35,7 @@ top15aip.csv
 HTML File:
 CaseStudy26306.html
 
-In the root directory (Procrastination) we have the Codebook, which provides details on data sets used in this analysis, variable names and all the analysis thats being done as part of this project.
+In the root directory (Procrastination) we have the Codebook, which provides details on data sets used in this analysis, variable names and all the analysis that is being done as part of this project.
 
 Codebook - Doing Data Science Case Study 2.pdf
 
