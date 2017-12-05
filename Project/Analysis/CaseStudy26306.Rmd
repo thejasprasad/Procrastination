@@ -33,8 +33,8 @@ Data Preparation to read in and clean data was done.
 
 ```{r dataandclean}
 #1a
-#getwd()
-#setwd("C:/Users/jjschued/Documents")
+getwd()
+setwd("C:/Users/jjschued/Documents")
 procrast <- read.csv(file = "Procrastination.csv", sep=",", header=TRUE)
 
 #1a
@@ -254,7 +254,7 @@ GPmean <- c(sumtable[1], sumtable[2],  sumtable[3], sumtable[4], sumtable[5], su
 sumtable <- summary(procrastcomb$swlsmean)
 SSWLSmean <- c(sumtable[1], sumtable[2],  sumtable[3], sumtable[4], sumtable[5], sumtable[6], sumtable[7] )
 sumdf <- data.frame(Statistics, Age, Income, HDI, AIPmean, DPmean, GPmean, SSWLSmean)
-kable(sumdf, "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
+kable(sumdf, "html", padding = 2, longtable = TRUE, row.names = FALSE, digits = 2) %>%
 kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 
 #Histograms of two vairables above.  AIP is very much a bell shape curve and evenly distributed, while income is a left skewed curve with most falling on the lower end of the income scale
@@ -268,7 +268,11 @@ Gendersum <- count(procrastcomb, 'Gender')
 WStatussm <- count(procrastcomb, 'WorkStatus')
 OccuStSm <- count(procrastcomb, 'CurrentOccup')
 
-OccuStSm <- OccuStSm[order(-OccuStSm$freq),]
+colnames(Gendersum)[2] <- "Frequency"
+colnames(WStatussm)[2] <- "Frequency"
+colnames(OccuStSm)[2] <- "Frequency"
+
+OccuStSm <- OccuStSm[order(-OccuStSm$Frequency),]
 
 kable(Gendersum, "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
 kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
@@ -276,7 +280,7 @@ kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 kable(WStatussm, "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
 kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 
-kable(OccuStSm, "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
+kable(head(OccuStSm, 20), "html", padding = 2, longtable = TRUE, row.names = FALSE) %>%
 kable_styling(bootstrap_options = "striped", full_width = F, position = "left")
 
 # 4d Count of respondents by country
