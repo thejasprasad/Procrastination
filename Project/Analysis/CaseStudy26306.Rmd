@@ -2,7 +2,9 @@
 title: "Employment Study(Case Study 2)"
 author: "Joe Schueder/Thejas Prasad"
 date: "November 24, 2017"
-output: html_document
+output: 
+  html_document:
+    keep_md: true
 ---
 
 ```{r setup, include=FALSE}
@@ -31,8 +33,8 @@ Data Preparation to read in and clean data was done.
 
 ```{r dataandclean}
 #1a
-getwd()
-setwd("C:/Users/jjschued/Documents")
+#getwd()
+#setwd("C:/Users/jjschued/Documents")
 procrast <- read.csv(file = "Procrastination.csv", sep=",", header=TRUE)
 
 #1a
@@ -202,7 +204,7 @@ dim(hdicomb)
 
 #3c
 #write table to csv(6a)
-setwd("C:/Users/jjschued/Documents")
+#setwd("C:/Users/jjschued/Documents")
 write.table(hdicomb, file = "hdicomb.csv", col.names = TRUE, row.names = FALSE, sep =",")
 
 #merge procrastination and and hdicomb
